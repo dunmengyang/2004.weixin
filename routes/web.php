@@ -16,3 +16,5 @@ Route::get('/', function () {
 });
 
 Route::get('/text','TextController@checkSignature'); //测试
+
+Route::get('/text/token','TextController@getAccessToken'); //测试
