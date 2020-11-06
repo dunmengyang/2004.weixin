@@ -15,6 +15,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/text','TextController@checkSignature'); //测试
+Route::post('/wx','TextController@wxEvent'); //接收事件推送
 
-Route::get('/text/token','TextController@getAccessToken'); //测试
+Route::get('/wx/token','TextController@getAccessToken'); //获取access_token
