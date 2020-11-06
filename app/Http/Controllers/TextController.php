@@ -19,7 +19,7 @@ class TextController extends Controller
         $tmpStr = sha1( $tmpStr );
 
         if( $tmpStr == $signature ){
-            echo $_GET['echoStr'];
+            echo $_GET['echostr'];
         }else{
             echo false;
         }
