@@ -21,7 +21,7 @@ class TextController extends Controller
         if( $tmpStr == $signature ){
             echo $_GET['echostr'];
         }else{
-            echo false;
+            echo "111";
         }
     }
 }
