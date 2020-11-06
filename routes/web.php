@@ -15,4 +15,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/text','TextController@text'); //登陆视图
+Route::get('/text','TextController@checkSignature'); //测试
