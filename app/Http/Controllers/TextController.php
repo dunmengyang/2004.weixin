@@ -3,76 +3,92 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use GuzzleHttp\Client;
 
-class TextController extends Controller
+class TestController extends Controller
 {
-    public function checkSignature()
+
+    public function test1()
     {
-        $signature = $_GET["signature"];
-        $timestamp = $_GET["timestamp"];
-        $nonce = $_GET["nonce"];
+//        echo __METHOD__;
+//
+//        $list = DB::table('p_users')->limit(5)->get()->toArray();
+//        echo '<pre>';print_r($list);echo '</pre>';
 
-        $token = env('WX_TOKEN');
-        $tmpArr = array($token, $timestamp, $nonce);
-        sort($tmpArr, SORT_STRING);
-        $tmpStr = implode( $tmpArr );
-        $tmpStr = sha1( $tmpStr );
 
-        if( $tmpStr == $signature ){
-            echo $_GET['echostr'];
-        }else{
-            echo "111";
-        }
+        $key = 'wx2004';
+        Redis::set($key,time());
+        echo Redis::get($key);
     }
 
-    //处理事件推送
-    public function wxEvent(){
-        $signature = $_GET["signature"];
-        $timestamp = $_GET["timestamp"];
-        $nonce = $_GET["nonce"];
-
-        $token = env('WX_TOKEN');
-        $tmpArr = array($token, $timestamp, $nonce);
-        sort($tmpArr, SORT_STRING);
-        $tmpStr = implode( $tmpArr );
-        $tmpStr = sha1( $tmpStr );
-
-        if ($tmpStr == $signature){     //验证通过
-            // 1 接受数据
-            $xml_str = file_get_contents('php://input');
-
-            // 记录日志
-            file_put_contents('wx_envent.log',$xml_str);
-            echo "";
-            die;
-
-        }else{
-            echo "";
-        }
+    public function test3()
+    {
+        echo '<pre>';print_r($_GET);echo '</pre>';
     }
 
-    public function getAccessToken(){
-        $key = 'wx:access_token';
+    public function test4()
+    {
+        //echo '<pre>';print_r($_POST);echo '</pre>';
+        $xml_str = file_get_contents("php://input");
 
-        //检查是否有token
-        $token = Redis::get($key);
-        if ($token){
-            echo "有缓存";echo '</br>';
-        }else{
-            echo "无缓存";
-            $url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=".env('WX_APPID')."&secret=".env('WX_APPSEC');
-            $response = file_get_contents($url);
 
-            $data = json_decode($response,true);
-            $token = $data['access_token'];
-            //数据保存到Redis中 时间为 3600秒
-            Redis::set($key,$token);
-            Redis::expire($key,3600);
-        }
+        //将 xml 转换为 对象或数组
+        $xml_obj = simplexml_load_string($xml_str);
+        //echo '<pre>';print_r($xml_obj);echo '</pre>';
 
-        echo "access_token:".$token;
+        echo $xml_obj->ToUserName;
 
     }
+
+
+    public function wx()
+    {
+        echo __METHOD__;
+    }
+
+    public function wx2()
+    {
+        echo '<pre>';print_r($_POST);echo '</pre>';
+    }
+
+    public function guzzle1()
+    {
+        $url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=".env('WX_APPID')."&secret=".env('WX_APPSEC');
+
+        //使用guzzle发起get请求
+        $client = new Client();         //实例化 客户端
+        $response = $client->request('GET',$url,['verify'=>false]);       //发起请求并接收响应
+
+        $json_str = $response->getBody();       //服务器的响应数据
+        echo $json_str;
+
+    }
+
+    public function guzzle2()
+    {
+        $access_token = "";
+        $type = 'image';
+        $url = 'https://api.weixin.qq.com/cgi-bin/media/upload?access_token='.$access_token.'&type='.$type;
+        //使用guzzle发起get请求
+        $client = new Client();         //实例化 客户端
+        $response = $client->request('POST',$url,[
+            'verify'    => false,
+            'multipart' => [
+                [
+                    'name'  => 'media',
+                    'contents'  => fopen('gsl.jpg','r')
+                ],         //上传的文件路径]
+
+
+            ]
+        ]);       //发起请求并接收响应
+
+        $data = $response->getBody();
+        echo $data;
+
+    }
+
 
 }
